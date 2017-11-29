@@ -121,7 +121,7 @@ export class _Notification extends Base implements Notification {
 
     /**
      * Invoked when the notification is shown
-     * @return {Promise.<Message>}
+     * @return {Promise.<Message<any>>}
      * @tutorial Notification.show
      */
     public show(): Promise<Message<any>> {
@@ -149,7 +149,7 @@ export class _Notification extends Base implements Notification {
      * Can be either a primitive data type (string, number, or boolean)
      * or composite data type (object, array) that is composed of other
      * primitive or composite data types
-     * @return {Promise.<void>}
+     * @return {Promise.<Message<any>>}
      * @tutorial Notification.sendMessage
      */
     public sendMessage(message: any): Promise<Message<any>> {
@@ -166,8 +166,30 @@ export class _Notification extends Base implements Notification {
     }
 
     /**
+     * Sends a message from the notification to the application that created the notification
+     * The message is handled by the notification's onMessage callback.
+     * @param {any} message - The message to be sent to the application.
+     * Can be either a primitive data type (string, number, or boolean)
+     * or composite data type (object, array) that is composed of other
+     * primitive or composite data types.
+     * @return {Promise.<Message<any>>}
+     * @tutorial Notification.sendMessageToApplication
+     */
+    public sendMessageToApplication(message: any): Promise<Message<any>> {
+        return this.wire.sendAction('send-action-to-notifications-center', {
+            action: 'send-notification-message',
+            payload: {
+                notificationId: this.options.notificationId,
+                message: {
+                    message
+                }
+            }
+        });
+    }
+
+    /**
      * Closes the notification
-     * @return {Promise.<Messge>}
+     * @return {Promise.<Messge<any>>}
      * @tutorial Notification.close
      */
     public close(): Promise<Message<any>> {
@@ -188,13 +210,49 @@ export default class _NotificationModule extends Bare {
     private genNoteId() {
         // tslint:disable-next-line
         return ++this.nextNoteId;
-    };
-
+    }
+    private current: _Notification;
     public events = events;
 
+    /**
+     * Create a notification object
+     * @param {any} options
+     * @return {Promise.<Application>}
+     */
     public create(options: any): _Notification {
         const noteOptions = new NotificationOptions(options, this.me, this.genNoteId());
+        this.current = new _Notification(this.wire,  noteOptions);
+        return this.current;
+    }
 
-        return new _Notification(this.wire,  noteOptions);
-    };
+    /**
+     * Gets an instance of the current notification.
+     * For use within a notification window to close the window
+     * or send a message back to its parent application.
+     * @return {object}
+     * @tutorial notification.getCurrent
+     */
+    public getCurrent(): Object {
+        return {
+            close: () => {
+                return this.wire.sendAction('send-action-to-notifications-center', {
+                    action: 'close-notification',
+                    payload: {
+                        notificationId: this.nextNoteId
+                    }
+                });
+            },
+            sendMessageToApplication: (message: any) => {
+                return this.wire.sendAction('send-action-to-notifications-center', {
+                    action: 'message_from_note',
+                    payload: {
+                        notificationId: this.nextNoteId,
+                        message: {
+                            message
+                        }
+                    }
+                });
+            }
+        };
+    }
 }

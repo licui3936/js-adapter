@@ -166,28 +166,6 @@ export class _Notification extends Base implements Notification {
     }
 
     /**
-     * Sends a message from the notification to the application that created the notification
-     * The message is handled by the notification's onMessage callback.
-     * @param {any} message - The message to be sent to the application.
-     * Can be either a primitive data type (string, number, or boolean)
-     * or composite data type (object, array) that is composed of other
-     * primitive or composite data types.
-     * @return {Promise.<Message<any>>}
-     * @tutorial Notification.sendMessageToApplication
-     */
-    public sendMessageToApplication(message: any): Promise<Message<any>> {
-        return this.wire.sendAction('send-action-to-notifications-center', {
-            action: 'send-notification-message',
-            payload: {
-                notificationId: this.options.notificationId,
-                message: {
-                    message
-                }
-            }
-        });
-    }
-
-    /**
      * Closes the notification
      * @return {Promise.<Messge<any>>}
      * @tutorial Notification.close
@@ -228,28 +206,33 @@ export default class _NotificationModule extends Bare {
     /**
      * Gets an instance of the current notification.
      * For use within a notification window to close the window
-     * or send a message back to its parent application.
+     * or send a message back to its external application.
      * @return {object}
      * @tutorial notification.getCurrent
      */
     public getCurrent(): Object {
         return {
             close: () => {
-                return this.wire.sendAction('send-action-to-notifications-center', {
-                    action: 'close-notification',
-                    payload: {
-                        notificationId: this.nextNoteId
+                return this.wire.sendAction('notifications', {
+                    action: 19,   //close
+                    data: {
+                        force: true
+                    },
+                    id: {
+                        name: this.me.name,
+                        uuid: this.me.uuid
                     }
                 });
             },
             sendMessageToApplication: (message: any) => {
-                return this.wire.sendAction('send-action-to-notifications-center', {
-                    action: 'message_from_note',
-                    payload: {
-                        notificationId: this.nextNoteId,
-                        message: {
-                            message
-                        }
+                return this.wire.sendAction('notifications', {
+                    action: 14, //message_from_note
+                    data: {
+                        message
+                    },
+                    id: {
+                        name: this.me.name,
+                        uuid: this.me.uuid
                     }
                 });
             }

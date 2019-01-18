@@ -37,55 +37,12 @@ export interface NotificationCallback {
 }
 
 /**
- * @typedef {object} fin.desktop.Notification~onShowSuccess
- * @summary Notification success callback object.
- * @desc This is returned by the success callback on a successful show.
- * @property {number}  httpResponseCode - [HTTP response code]{@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status}
- */
-
-/**
- * Invoked when the notification is shown.
- * @callback fin.desktop.Notification~onShow
- * @param {Notification~onShowSuccess} successObj - [onShowSuccess]{@link fin.desktop.Notification~onShowSuccess}
- */
-
-/**
- * Invoked when the notification is closed via `close()` on the notification instance.
- * NOTE: this is not invoked when the notification is dismissed via a swipe. For the swipe dismissal callback
- * see [onDismiss]{@link Notification~onDismiss}.
- * @callback Notification~onClose
- */
-
-/**
- * Invoked when the notification is dismissed by swiping it off the screen to the right.
- * NOTE: this is not fired on a programmatic close.
- * @callback Notification~onDismiss
- */
-
-/**
- * Invoked when the notification is clicked.
- * @callback Notification~onClick
- */
-
-/**
- * Invoked when the notification recieves a message sent via `sendMessage()` on the notification instance.
- * @callback Notification~onMessage
- * @param {any} message - The message sent to the notification via `sendMessage`.
- */
-
-/**
  * @typedef {object} Notification~options
  * @summary Notification creation options.
  * @desc This is the options object required by the {@link Notification.create Notification.create}.
  * @property {boolean} ignoreMouseOver - Force dismissal even if the mouse is hovering over the notification.
  * @property {any} message - Any serializable JavaScript value.
- * @property {Notification~onClick} onClick - [onClick]{@link Notification~onClick}
- * @property {Notification~onClose} onClose - [onClose]{@link Notification~onClose}
- * @property {Notification~onDismiss} onDismiss - [onDismiss]{@link Notification~onDismiss}
- * @property {Notification~onMessage} onMessage - [onMessage]{@link Notification~onMessage}
- * @property {Notification~onShow} onShow - [onShow]{@link Notification~onShow}
  * @property {number|string} timeout - The duration the notification is shown in milliseconds.
- * @property {number} opacity - A flag that specifies how transparent the notification will be. This value is clamped between 0.0 and 1.0.
  * @property {string} url - The URL for the notification.
  */
 
@@ -93,8 +50,8 @@ export interface NotificationCallback {
  * @classdesc A Notification object represents a window on OpenFin Runtime which
  * is shown briefly to the user on the bottom-right corner of the primary monitor.
  * A notification is typically used to alert the user of some important event which
- * requires his or her attention. Notifications are a child or your application that
- * are controlled by the runtime.
+ * requires his or her attention. Notification is a child or your application that
+ * is controlled by the runtime.
  * @class
  * @alias Notification
  * @hideconstructor
@@ -171,7 +128,6 @@ export class _Notification extends EmitterBase<NotificationEvents> {
      * @tutorial Notification.sendMessage
      */
     public async sendMessage(message: any): Promise<void> {
-
         await this.wire.sendAction('send-action-to-notifications-center', {
             action: 'send-notification-message',
             payload: {

@@ -164,6 +164,11 @@ class Transport extends EventEmitter {
     }
 
     protected handleMessage(data: Message<Payload>): boolean {
+        // Show a warning message if the api is secured api.
+        if (data.isSecuredAPI) {
+            console.warn('This API is secured. The action is not authorized');
+        }
+
         // tslint:disable-next-line
         const id: number = data.correlationId || NaN;
 
@@ -206,6 +211,7 @@ export class Message<T> {
     public action: string;
     public payload: T;
     public correlationId?: number;
+    public isSecuredAPI?: boolean;
 }
 export class EventMessage implements Message<RuntimeEvent> {
    public action: 'process-desktop-event';
